@@ -1,0 +1,230 @@
+#include<windows.h>
+#ifdef __APPLE__
+#include <GLUT/glut.h>
+#else
+#include <GL/glut.h>
+#endif
+
+#include <stdlib.h>
+#include<cmath>
+#include<iostream>
+using namespace std;
+struct Point
+{
+    int x;
+    int y;
+}pointArr[10];
+int i=0;
+void Init()
+{
+    glClearColor(1,1,1,0);
+    gluOrtho2D(0,640,0,480);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+}
+void translate(int n, int tx, int ty);
+static void display(void)
+{
+    glClear(GL_COLOR_BUFFER_BIT);
+    glColor3d(1,0,0);
+    glFlush();
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+void translate(int n, int tx, int ty)
+{
+    Point pointArr1[10];
+    glColor3d (1, 0, 1);
+    for(int j=0; j<n; j++)
+    {
+        pointArr1[j].x=pointArr[j].x+tx;
+        pointArr1[j].y=pointArr[j].y+ty;
+
+    }
+
+    glBegin(GL_LINE_LOOP);
+        for(int j=0; j<n; j++)
+        {
+            glVertex2d(pointArr1[j].x, pointArr1[j].y);
+        }
+    glEnd();
+    glFlush();
+}
+
+void Rotate(int n, Point pivot, double angle)
+{
+    glColor3d (1, 0, 1);
+    double theta = angle*M_PI/180;
+    cout<<"\ntheta: "<<theta;
+    Point pointArr1[10];
+    for(int j=0; j<n; j++)
+    {
+        pointArr1[j].x = pivot.x + (pointArr[j].x - pivot.x)*cos(theta) - (pointArr[j].y - pivot.y)*sin(theta);
+        pointArr1[j].y = pivot.y + (pointArr[j].x - pivot.x)*sin(theta) + (pointArr[j].y - pivot.y)*cos(theta);
+        //normal rotation with translation
+        //pointArr1[j].x = pointArr[j].x*cos(theta) - pointArr[j].y*sin(theta);
+        //pointArr1[j].y = pointArr[j].x*sin(theta) + pointArr[j].y*cos(theta);
+        cout<<"\nx: "<<pointArr1[j].x<<" y: "<<pointArr1[j].y;
+    }
+
+    glBegin(GL_LINE_LOOP);
+        for(int j=0; j<n; j++)
+        {
+            glVertex2d(pointArr1[j].x, pointArr1[j].y);
+        }
+    glEnd();
+    glFlush();
+}
+
+void scaling(int sx, int sy)
+{
+    Point pointArr1[10];
+    for(int j=0; j<i; j++)
+    {
+        pointArr1[j].x = sx*pointArr[j].x;
+        pointArr1[j].y = sx*pointArr[j].y;
+    }
+
+    glBegin(GL_LINE_LOOP);
+        for(int j=0; j<i; j++)
+        {
+            glVertex2d(pointArr1[j].x, pointArr1[j].y);
+        }
+    glEnd();
+    glFlush();
+
+}
+
+void shearX(float shx)
+{
+    Point pointArr1[10];
+    for(int j=0; j<i; j++)
+    {
+        pointArr1[j].x = pointArr[j].x + shx*pointArr[j].y;
+        pointArr1[j].y = pointArr[j].y;
+    }
+
+    glBegin(GL_LINE_LOOP);
+        for(int j=0; j<i; j++)
+        {
+            glVertex2d(pointArr1[j].x, pointArr1[j].y);
+        }
+    glEnd();
+    glFlush();
+}
+
+void shearY(int shy)
+{
+    Point pointArr1[10];
+    for(int j=0; j<i; j++)
+    {
+        pointArr1[j].y = pointArr[j].y + shy*pointArr[j].x;
+        pointArr1[j].x = pointArr[j].x;
+    }
+
+    glBegin(GL_LINE_LOOP);
+        for(int j=0; j<i; j++)
+        {
+            glVertex2d(pointArr1[j].x, pointArr1[j].y);
+        }
+    glEnd();
+    glFlush();
+}
+
+void mouse(int button, int state, int x, int y) {
+
+    int window_height = glutGet(GLUT_WINDOW_HEIGHT);
+    if(state == GLUT_DOWN && button == GLUT_LEFT_BUTTON) {
+        glColor3f (1.0, 0.4, 0.2);
+        glPointSize(5);
+        pointArr[i].x = x;
+        pointArr[i].y = window_height - y;
+        ++i;
+        glBegin(GL_POINTS);
+            glVertex2f(x, window_height - y);
+        glEnd();
+        glFlush();
+    }
+    else if (button == GLUT_RIGHT_BUTTON && state == GLUT_UP )
+    {
+        cout<<"\ni:"<<i;
+        glBegin(GL_LINE_LOOP);
+            for(int j=0; j<i; j++)
+            {
+                //cout<<"\n\n The point: "<<pointArr[j].x<<'\t'<<pointArr[j].y;
+                glVertex2d(pointArr[j].x, pointArr[j].y);
+            }
+            cout<<i;
+        glEnd();
+        glFlush();
+        //translate(i,100,100);
+        Point pivot;
+        pivot.x=0;
+        pivot.y=0;
+        Rotate(i, pointArr[0], 30);
+        //scaling(2,3);
+        //Rotate(i, pivot, 45);
+        //shearX(1.5);
+        //shearY(1.5);
+    }
+}
+
+
+int main(int argc, char *argv[])
+{
+    glutInit(&argc, argv);
+    glutInitWindowSize(640,480);
+    glutInitWindowPosition(10,10);
+    glutInitDisplayMode(GLUT_RGB | GLUT_SINGLE);
+
+    glutCreateWindow("TRANSFORMATIONS");
+
+    Init();
+    glutDisplayFunc(display);
+    glutMouseFunc(mouse);
+    glutMainLoop();
+
+    return EXIT_SUCCESS;
+}
