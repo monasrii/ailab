@@ -1,0 +1,153 @@
+#include <windows.h>
+#include <vector>
+#include <GL/glut.h>
+#include <cstdint>
+#include <iostream>
+#include <cmath>
+
+struct Point2D {
+    float x;
+    float y;
+};
+
+static inline int8_t sign(const float x, const float y) {
+    return x < y ? -1 : (x > y ? +1 : 0);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+static inline void plot(const Point2D& point, const GLfloat& red, const GLfloat& green, const GLfloat& blue) {
+    glBegin(GL_POINTS);
+        glColor3f(red, green, blue);
+        glVertex2f(point.x, point.y);
+    glEnd();
+}
+
+static inline void plot(const float x, const float y, const GLfloat& red, const GLfloat& green, const GLfloat& blue) {
+    glBegin(GL_POINTS);
+        glColor3f(red, green, blue);
+        glVertex2f(x, y);
+    glEnd();
+    glFlush();
+}
+
+static inline void plotSymmetricPoints(const int32_t xc, const int32_t yc,
+                                       const int32_t x, const int32_t y,
+                                       const GLfloat& red, const GLfloat& green, const GLfloat& blue) {
+
+    plot(x, y, red, green, blue);
+    plot(y, x, red, green, blue);
+
+    plot(x, -y, red, green, blue);
+    plot(y, -x, red, green, blue);
+
+    plot(-x, -y, red, green, blue);
+    plot(-y, -x, red, green, blue);
+
+    plot(-x, y, red, green, blue);
+    plot(-y, x, red, green, blue);
+}
+
+
+void MidPointCircle(const uint32_t x_centre, const uint32_t y_centre, const uint32_t radius,
+                    const GLfloat& red, const GLfloat& green, const GLfloat& blue) {
+
+    int32_t x = 0;
+    int32_t y = radius;
+    int32_t p = 1 - (int32_t) radius;
+
+    plotSymmetricPoints(x_centre, y_centre, 0, radius, red, green, blue);
+
+    while (x < y) {
+        ++x;
+
+        if (p < 0) {
+            plotSymmetricPoints(x_centre, y_centre, x, y, red, green, blue);
+            p += 2*x + 1;
+        }
+
+        else {
+            --y;
+            plotSymmetricPoints(x_centre, y_centre, x, y, red, green, blue);
+            p += 2*(x-y) + 1;
+        }
+    }
+}
+
+float xCoord = 0.0;
+float yCoord = 0.0;
+float radius = 0.0;
+std::vector<Point2D> points = {};
+
+void storeMousePoint(int mouseButton, int mouseState, int x, int y) {
+
+    if (mouseButton == GLUT_LEFT_BUTTON && mouseState == GLUT_DOWN) {
+        xCoord = x;
+        yCoord = 480 - y;
+        Point2D newPoint = {xCoord, yCoord};
+        points.push_back(newPoint);
+    }
+
+    if (points.size() == 2) {
+        // Bresenham(points.at(0), points.at(1), 1, 0, 0);
+        radius = sqrt(pow(points.at(0).x - points.at(1).x, 2) + pow(points.at(0).y - points.at(1).y, 2));
+        MidPointCircle(points.at(0).x, points.at(0).y, radius, 1, 0, 0);
+    }
+}
+
+void init() {
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluOrtho2D(-300, 300, -300, 300);
+    glClearColor(0, 0, 0, 0);
+}
+
+static void display(void)
+{
+    glClear(GL_COLOR_BUFFER_BIT);
+    glutMouseFunc(storeMousePoint);
+    glFlush();
+}
+
+int main(int argc, char *argv[])
+{
+    glutInit(&argc, argv);
+    glutInitWindowSize(600, 600);
+    glutInitWindowPosition(10,10);
+    glutInitDisplayMode(GLUT_RGB | GLUT_SINGLE);
+    glutCreateWindow("Line Drawing");
+    init();
+    glutDisplayFunc(display);
+    glutMainLoop();
+
+    return EXIT_SUCCESS;
+}
+
